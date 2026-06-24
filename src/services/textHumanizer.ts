@@ -202,9 +202,13 @@ interface ModeOpts {
 
 function getModeOpts(form: HumanizerForm): ModeOpts {
   const cs = form.customSettings
-  const pkw = cs.protectedKeywords.split(',').map((k) => k.trim()).filter(Boolean)
+  const pkw = [
+    ...cs.protectedKeywords.split(',').map((k) => k.trim()).filter(Boolean),
+    ...form.preservedExpressions.split(',').map((k) => k.trim()).filter(Boolean),
+  ]
   const avoid = cs.avoidExpressions.split(',').map((k) => k.trim()).filter(Boolean)
-  const reg = cs.regionalVariant
+  const reg = form.regionalVariant || cs.regionalVariant
+  const selectedStyle = form.style
 
   switch (form.mode) {
     case 'natural':
@@ -214,7 +218,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: true, applyRestructure: true,
         applyBurstiness: true, burstinessThreshold: 28,
         applyPersonalVoice: false, applyConcise: false,
-        style: 'Más natural', regionalVariant: reg,
+        style: selectedStyle || 'Más natural', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'academico':
@@ -224,7 +228,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: true, applyRestructure: false,
         applyBurstiness: true, burstinessThreshold: 38,
         applyPersonalVoice: false, applyConcise: false,
-        style: 'Más académico', regionalVariant: reg,
+        style: selectedStyle || 'Más académico', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'profesional':
@@ -234,7 +238,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: false, applyRestructure: false,
         applyBurstiness: true, burstinessThreshold: 35,
         applyPersonalVoice: false, applyConcise: false,
-        style: 'Más profesional', regionalVariant: reg,
+        style: selectedStyle || 'Más profesional', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'conversacional':
@@ -244,7 +248,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: true, applyRestructure: true,
         applyBurstiness: true, burstinessThreshold: 25,
         applyPersonalVoice: true, applyConcise: false,
-        style: 'Más cercano', regionalVariant: reg,
+        style: selectedStyle || 'Más cercano', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'creativo':
@@ -254,7 +258,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: true, applyRestructure: true,
         applyBurstiness: true, burstinessThreshold: 22,
         applyPersonalVoice: true, applyConcise: false,
-        style: 'Más informal', regionalVariant: reg,
+        style: selectedStyle || 'Más informal', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'conciso':
@@ -264,7 +268,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: false, applyRestructure: true,
         applyBurstiness: true, burstinessThreshold: 22,
         applyPersonalVoice: false, applyConcise: true,
-        style: 'Directo', regionalVariant: reg,
+        style: selectedStyle || 'Directo', regionalVariant: reg,
         protectedKeywords: pkw, avoidExpressions: avoid,
       }
     case 'personalizado': {
@@ -284,7 +288,7 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         burstinessThreshold: variation >= 4 ? 22 : variation >= 3 ? 28 : 35,
         applyPersonalVoice: cs.usePOV === 'first' || creative >= 4,
         applyConcise: cs.lengthPreference === 'shorter',
-        style: formal >= 4 ? 'Más profesional' : formal <= 2 ? 'Más cercano' : 'Más natural',
+        style: selectedStyle || (formal >= 4 ? 'Más profesional' : formal <= 2 ? 'Más cercano' : 'Más natural'),
         regionalVariant: reg,
         protectedKeywords: pkw,
         avoidExpressions: avoid,
@@ -297,8 +301,8 @@ function getModeOpts(form: HumanizerForm): ModeOpts {
         applyParentheticals: true, applyRestructure: true,
         applyBurstiness: true, burstinessThreshold: 28,
         applyPersonalVoice: false, applyConcise: false,
-        style: 'Más natural', regionalVariant: 'Español (neutro)',
-        protectedKeywords: [], avoidExpressions: [],
+        style: selectedStyle || 'Más natural', regionalVariant: reg || 'Español (neutro)',
+        protectedKeywords: pkw, avoidExpressions: avoid,
       }
   }
 }
@@ -841,7 +845,10 @@ function calculateStats(original: string, result: string, form: HumanizerForm): 
   const englishMatches = (original.match(/\b(the|is|are|was|were|this|that|with|from|have|has|for)\b/gi) ?? []).length
   const detectedLanguage = englishMatches > spanishMatches ? 'Inglés' : 'Español'
 
-  const pkw = form.customSettings.protectedKeywords.split(',').map((k) => k.trim()).filter(Boolean)
+  const pkw = [
+    ...form.customSettings.protectedKeywords.split(',').map((k) => k.trim()).filter(Boolean),
+    ...form.preservedExpressions.split(',').map((k) => k.trim()).filter(Boolean),
+  ]
   const protectedKeywordsFound = pkw.filter((kw) => result.toLowerCase().includes(kw.toLowerCase()))
 
   return {

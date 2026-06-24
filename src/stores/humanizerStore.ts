@@ -31,6 +31,9 @@ export const DEFAULT_CUSTOM_SETTINGS: HumanizerCustomSettings = {
 
 const defaultForm: HumanizerForm = {
   originalText: '',
+  style: 'Más natural',
+  regionalVariant: 'Español (neutro)',
+  preservedExpressions: '',
   mode: 'natural',
   customSettings: DEFAULT_CUSTOM_SETTINGS,
 }

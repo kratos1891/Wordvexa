@@ -72,6 +72,9 @@ export interface HumanizerCustomSettings {
 
 export interface HumanizerForm {
   originalText: string
+  style: HumanizerStyle
+  regionalVariant: string
+  preservedExpressions: string
   mode: HumanizerMode
   customSettings: HumanizerCustomSettings
 }
