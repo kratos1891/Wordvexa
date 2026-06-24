@@ -894,6 +894,43 @@ function computeSentenceDiff(original: string, result: string): DiffSegment[] {
 }
 
 // ─── Motor principal ──────────────────────────────────────────────────────────
+function applyStyleIntent(text: string, style: string): { result: string; changes: string[] } {
+  let result = text
+  const changes: string[] = []
+  const normalizedStyle = style.toLowerCase()
+
+  if (normalizedStyle.includes('acad')) {
+    result = result.replace(/\bcosas\b/gi, 'aspectos')
+    result = result.replace(/\bmuy importante\b/gi, 'relevante')
+    result = result.replace(/\bbueno\b/gi, 'adecuado')
+    changes.push('Adaptado a registro academico')
+  }
+
+  if (normalizedStyle.includes('fluido')) {
+    result = result.replace(/\bademÃ¡s\b/gi, 'a su vez')
+    result = result.replace(/\bpor otro lado\b/gi, 'en paralelo')
+    result = result.replace(/\ben conclusiÃ³n\b/gi, 'para cerrar')
+    changes.push('Conectores ajustados para mayor fluidez')
+  }
+
+  if (normalizedStyle.includes('repetitivo')) {
+    result = result.replace(/\b(\w+)(\s+\1\b)+/gi, '$1')
+    changes.push('Reducidas repeticiones directas')
+  }
+
+  if (normalizedStyle.includes('convincente') && !/^Conviene destacar que\b/i.test(result)) {
+    result = `Conviene destacar que ${result.charAt(0).toLowerCase()}${result.slice(1)}`
+    changes.push('Refuerzo persuasivo aplicado')
+  }
+
+  if (normalizedStyle.includes('emocional') && !/^En el fondo,\s/i.test(result)) {
+    result = `En el fondo, ${result.charAt(0).toLowerCase()}${result.slice(1)}`
+    changes.push('Ajustado a un registro mas emocional')
+  }
+
+  return { result, changes }
+}
+
 export function humanizeText(form: HumanizerForm): HumanizerResult {
   const original = form.originalText
   if (!original.trim()) {
@@ -966,6 +1003,9 @@ export function humanizeText(form: HumanizerForm): HumanizerResult {
   if (opts.style) {
     const r = applySyntacticVariation(text, opts.style)
     text = r.result; allChanges.push(...r.changes)
+
+    const styleIntent = applyStyleIntent(text, opts.style)
+    text = styleIntent.result; allChanges.push(...styleIntent.changes)
   }
 
   if (opts.applyPersonalVoice) {

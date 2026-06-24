@@ -9,6 +9,7 @@ import {
 } from '../../data/tones'
 import { generateTextPrompt } from '../../services/textPromptGenerator'
 import { useToast } from '../../hooks/useToast'
+import { INPUT_LIMITS, isWithinLimit } from '../../utils/security'
 import { Wand2, RotateCcw } from 'lucide-react'
 
 interface TextModeFormProps {
@@ -22,6 +23,10 @@ export function TextModeForm({ onGenerated }: TextModeFormProps) {
   const handleGenerate = () => {
     if (!form.workType) {
       toast.error('Seleccioná el tipo de trabajo a realizar.')
+      return
+    }
+    if (!isWithinLimit(form.textContent, INPUT_LIMITS.longText)) {
+      toast.error(`El texto supera el limite de ${INPUT_LIMITS.longText.toLocaleString()} caracteres.`)
       return
     }
     const prompt = generateTextPrompt(form)
@@ -51,6 +56,7 @@ export function TextModeForm({ onGenerated }: TextModeFormProps) {
         placeholder="Pegá aquí el texto a mejorar, resumir, traducir... (o dejalo vacío si vas a crear desde cero)"
         value={form.textContent}
         rows={5}
+        maxLength={INPUT_LIMITS.longText}
         showCount
         onChange={(e) => setField('textContent', e.target.value)}
       />
@@ -106,6 +112,7 @@ export function TextModeForm({ onGenerated }: TextModeFormProps) {
         placeholder="¿Qué debe lograr este texto? ¿Qué acción debe generar?"
         value={form.objective}
         rows={2}
+        maxLength={INPUT_LIMITS.shortText}
         onChange={(e) => setField('objective', e.target.value)}
       />
 
@@ -114,6 +121,7 @@ export function TextModeForm({ onGenerated }: TextModeFormProps) {
         placeholder="Datos, fechas, nombres, conceptos que no pueden faltar..."
         value={form.requiredInfo}
         rows={3}
+        maxLength={INPUT_LIMITS.mediumText}
         onChange={(e) => setField('requiredInfo', e.target.value)}
       />
 
@@ -137,6 +145,7 @@ export function TextModeForm({ onGenerated }: TextModeFormProps) {
         placeholder="¿Cómo querés el resultado? (párrafos, bullet points, con título, etc.)"
         value={form.outputFormat}
         rows={2}
+        maxLength={INPUT_LIMITS.shortText}
         onChange={(e) => setField('outputFormat', e.target.value)}
       />
 

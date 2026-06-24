@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  Home, Code2, Type, LayoutTemplate, Clock, Star, Settings, Sparkles,
+  Home, Code2, Type, LayoutTemplate, Settings, Sparkles,
 } from 'lucide-react'
 import { clsx } from '../../utils/clsx'
 
@@ -10,8 +10,6 @@ const nav = [
   { to: '/text',       label: 'Modo Texto',    icon: Type },
   { to: '/humanizer',  label: 'Humanizador',   icon: Sparkles },
   { to: '/templates',  label: 'Plantillas',    icon: LayoutTemplate },
-  { to: '/history',    label: 'Historial',     icon: Clock },
-  { to: '/favorites',  label: 'Favoritos',     icon: Star },
   { to: '/settings',   label: 'Configuración', icon: Settings },
 ]
 

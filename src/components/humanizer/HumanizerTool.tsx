@@ -9,6 +9,8 @@ import { useHumanizerStore } from '../../stores/humanizerStore'
 import { HUMANIZER_STYLES, REGIONAL_VARIANTS } from '../../data/tones'
 import { humanizeText } from '../../services/textHumanizer'
 import { useToast } from '../../hooks/useToast'
+import type { HumanizerForm } from '../../types/textMode.types'
+import { INPUT_LIMITS, isWithinLimit } from '../../utils/security'
 import {
   Sparkles, Copy, RotateCcw, ArrowLeftRight,
   CheckCircle2, Shuffle, Zap, AlignLeft, Globe, Info,
@@ -31,6 +33,10 @@ export function HumanizerTool() {
       toast.error('Pegá un texto para humanizar.')
       return
     }
+    if (!isWithinLimit(form.originalText, INPUT_LIMITS.longText)) {
+      toast.error(`El texto supera el limite de ${INPUT_LIMITS.longText.toLocaleString()} caracteres.`)
+      return
+    }
     setProcessing(true)
     setTimeout(() => {
       const r = humanizeText(form)
@@ -50,6 +56,16 @@ export function HumanizerTool() {
   const handleReset = () => {
     reset()
     setActiveTab('original')
+  }
+
+  const updateConfigField = <K extends keyof HumanizerForm>(key: K, value: HumanizerForm[K]) => {
+    const nextForm = { ...form, [key]: value }
+    setField(key, value)
+
+    if (result && nextForm.originalText.trim()) {
+      setResult(humanizeText(nextForm))
+      setActiveTab('result')
+    }
   }
 
   const charOrig = form.originalText.length
@@ -89,19 +105,19 @@ export function HumanizerTool() {
           placeholder="Elige un estilo"
           options={HUMANIZER_STYLES}
           value={form.style}
-          onChange={(e) => setField('style', e.target.value as typeof form.style)}
+          onChange={(e) => updateConfigField('style', e.target.value as typeof form.style)}
         />
         <Select
           label="Variante regional"
           options={REGIONAL_VARIANTS}
           value={form.regionalVariant}
-          onChange={(e) => setField('regionalVariant', e.target.value)}
+          onChange={(e) => updateConfigField('regionalVariant', e.target.value)}
         />
         <Input
           label="Expresiones a conservar"
           placeholder="expr1, frase2, ..."
           value={form.preservedExpressions}
-          onChange={(e) => setField('preservedExpressions', e.target.value)}
+          onChange={(e) => updateConfigField('preservedExpressions', e.target.value)}
           hint="Separá con comas"
         />
       </div>
@@ -112,6 +128,7 @@ export function HumanizerTool() {
         placeholder="Pegá aquí el texto que querés humanizar..."
         value={form.originalText}
         rows={9}
+        maxLength={INPUT_LIMITS.longText}
         showCount
         onChange={(e) => setField('originalText', e.target.value)}
       />

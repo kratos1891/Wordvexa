@@ -28,6 +28,7 @@ export const useAppStore = create<AppState>()(
         const next = get().theme === 'dark' ? 'light' : 'dark'
         set({ theme: next })
         document.documentElement.classList.toggle('dark', next === 'dark')
+        document.documentElement.classList.toggle('light', next === 'light')
       },
 
       setSidebarOpen: (open) => set({ sidebarOpen: open }),

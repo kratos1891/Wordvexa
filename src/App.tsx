@@ -6,8 +6,6 @@ import { CodeModePage } from './pages/CodeModePage'
 import { TextModePage } from './pages/TextModePage'
 import { HumanizerPage } from './pages/HumanizerPage'
 import { TemplatesPage } from './pages/TemplatesPage'
-import { HistoryPage } from './pages/HistoryPage'
-import { FavoritesPage } from './pages/FavoritesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useAppStore } from './stores/appStore'
 
@@ -15,6 +13,7 @@ function ThemeInitializer() {
   const theme = useAppStore((s) => s.theme)
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    document.documentElement.classList.toggle('light', theme === 'light')
   }, [theme])
   return null
 }
@@ -30,9 +29,8 @@ export default function App() {
           <Route path="/text" element={<TextModePage />} />
           <Route path="/humanizer" element={<HumanizerPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<HomePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

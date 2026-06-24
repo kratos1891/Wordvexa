@@ -8,28 +8,48 @@ import { useCodeModeStore } from '../stores/codeModeStore'
 import { useTextModeStore } from '../stores/textModeStore'
 import { useToast } from '../hooks/useToast'
 import { clsx } from '../utils/clsx'
+import type { TextWorkType } from '../types/textMode.types'
 
 type FilterMode = 'all' | 'code' | 'text'
 
+function getTemplateWorkType(template: Template): TextWorkType {
+  if (template.id === 'tpl-humanize') return 'Humanizar texto'
+  if (template.id === 'tpl-summarize') return 'Resumir'
+  if (template.id === 'tpl-story') return 'Crear historia'
+  return 'Crear texto desde cero'
+}
+
 export function TemplatesPage() {
   const navigate = useNavigate()
-  const { setGeneratedPrompt: setCodePrompt } = useCodeModeStore()
-  const { setGeneratedPrompt: setTextPrompt } = useTextModeStore()
+  const {
+    setGeneratedPrompt: setCodePrompt,
+    setField: setCodeField,
+  } = useCodeModeStore()
+  const {
+    setGeneratedPrompt: setTextPrompt,
+    setField: setTextField,
+  } = useTextModeStore()
   const toast = useToast()
   const [filter, setFilter] = useState<FilterMode>('all')
 
-  const filtered = TEMPLATES.filter((t) => filter === 'all' || t.mode === filter)
+  const filtered = TEMPLATES.filter((template) => filter === 'all' || template.mode === filter)
 
   const handleUse = (template: Template) => {
     if (template.mode === 'code') {
+      setCodeField('description', template.description)
+      setCodeField('additionalInfo', template.content)
       setCodePrompt(template.content)
-      toast.success(`Plantilla "${template.title}" cargada en Modo Código.`)
+      toast.success(`Plantilla "${template.title}" cargada en Modo Codigo.`)
       navigate('/code')
-    } else {
-      setTextPrompt(template.content)
-      toast.success(`Plantilla "${template.title}" cargada en Modo Texto.`)
-      navigate('/text')
+      return
     }
+
+    setTextField('workType', getTemplateWorkType(template))
+    setTextField('textContent', template.content)
+    setTextField('objective', template.description)
+    setTextPrompt(template.content)
+    toast.success(`Plantilla "${template.title}" cargada en Modo Texto.`)
+    navigate('/text')
   }
 
   return (
@@ -45,20 +65,19 @@ export function TemplatesPage() {
           </div>
         </div>
 
-        {/* Filter tabs */}
         <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/40 p-1">
-          {(['all', 'code', 'text'] as FilterMode[]).map((m) => (
+          {(['all', 'code', 'text'] as FilterMode[]).map((mode) => (
             <button
-              key={m}
-              onClick={() => setFilter(m)}
+              key={mode}
+              onClick={() => setFilter(mode)}
               className={clsx(
                 'px-3 py-1.5 text-xs font-medium rounded-md transition-all',
-                filter === m
+                filter === mode
                   ? 'bg-violet-600 text-white'
                   : 'text-slate-400 hover:text-slate-200'
               )}
             >
-              {m === 'all' ? 'Todas' : m === 'code' ? 'Código' : 'Texto'}
+              {mode === 'all' ? 'Todas' : mode === 'code' ? 'Codigo' : 'Texto'}
             </button>
           ))}
         </div>

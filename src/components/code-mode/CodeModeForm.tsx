@@ -7,6 +7,7 @@ import {
 } from '../../data/languages'
 import { generateCodePrompt } from '../../services/promptGenerator'
 import { useToast } from '../../hooks/useToast'
+import { INPUT_LIMITS, isWithinLimit } from '../../utils/security'
 import { Wand2, RotateCcw } from 'lucide-react'
 
 interface CodeModeFormProps {
@@ -20,6 +21,10 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
   const handleGenerate = () => {
     if (!form.description.trim()) {
       toast.error('Por favor, escribí una descripción del proyecto.')
+      return
+    }
+    if (!isWithinLimit(form.existingCode, INPUT_LIMITS.codeText)) {
+      toast.error(`El codigo supera el limite de ${INPUT_LIMITS.codeText.toLocaleString()} caracteres.`)
       return
     }
     const prompt = generateCodePrompt(form)
@@ -81,6 +86,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
         placeholder="Describí qué querés crear, mejorar o corregir..."
         value={form.description}
         rows={4}
+        maxLength={INPUT_LIMITS.mediumText}
         showCount
         onChange={(e) => setField('description', e.target.value)}
       />
@@ -90,6 +96,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
         placeholder="Lista las funcionalidades que debe tener..."
         value={form.features}
         rows={3}
+        maxLength={INPUT_LIMITS.mediumText}
         onChange={(e) => setField('features', e.target.value)}
       />
 
@@ -99,6 +106,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
           placeholder="Restricciones, versiones, compatibilidad..."
           value={form.technicalRequirements}
           rows={3}
+          maxLength={INPUT_LIMITS.mediumText}
           onChange={(e) => setField('technicalRequirements', e.target.value)}
         />
         <Textarea
@@ -106,6 +114,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
           placeholder="Estilo visual, colores, referencias..."
           value={form.desiredDesign}
           rows={3}
+          maxLength={INPUT_LIMITS.mediumText}
           onChange={(e) => setField('desiredDesign', e.target.value)}
         />
       </div>
@@ -115,6 +124,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
         placeholder="Pegá aquí tu código actual (si tenés)..."
         value={form.existingCode}
         rows={6}
+        maxLength={INPUT_LIMITS.codeText}
         className="font-mono text-xs"
         onChange={(e) => setField('existingCode', e.target.value)}
       />
@@ -124,6 +134,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
         placeholder="Describí o pegá los mensajes de error..."
         value={form.currentErrors}
         rows={3}
+        maxLength={INPUT_LIMITS.mediumText}
         onChange={(e) => setField('currentErrors', e.target.value)}
       />
 
@@ -133,6 +144,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
           placeholder="Lo que NO debe hacer, usar o incluir..."
           value={form.restrictions}
           rows={3}
+          maxLength={INPUT_LIMITS.mediumText}
           onChange={(e) => setField('restrictions', e.target.value)}
         />
         <Textarea
@@ -140,6 +152,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
           placeholder="Cómo querés que te responda la IA..."
           value={form.responseFormat}
           rows={3}
+          maxLength={INPUT_LIMITS.mediumText}
           onChange={(e) => setField('responseFormat', e.target.value)}
         />
       </div>
@@ -149,6 +162,7 @@ export function CodeModeForm({ onGenerated }: CodeModeFormProps) {
         placeholder="Cualquier detalle extra relevante..."
         value={form.additionalInfo}
         rows={2}
+        maxLength={INPUT_LIMITS.mediumText}
         onChange={(e) => setField('additionalInfo', e.target.value)}
       />
 
